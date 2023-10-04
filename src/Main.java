@@ -1,6 +1,7 @@
 import model.Epic;
 import model.Subtask;
 import model.Task;
+import service.TaskManager;
 
 public class Main {
 
@@ -48,7 +49,7 @@ public class Main {
 
         System.out.println("Проверяем статус epic1 при удалении сабтаска");
         System.out.println(epic1.toString() + "\n");
-        taskManager.removeSubtask(4);
+
         System.out.println("После удаления:");
         System.out.println(epic1.toString() + "\n");
 
@@ -56,5 +57,16 @@ public class Main {
         taskManager.removeEpic(5);
         System.out.println(taskManager.getAllEpic());
         System.out.println(taskManager.getAllSubtask());
+
+        System.out.println("/*--");
+        taskManager.printTask();
+        taskManager.printEpic();
+        taskManager.printSubtask();
+        System.out.println("/*--");
+        taskManager.removeSubtask(4);
+        taskManager.printTask();
+        taskManager.printEpic();
+        taskManager.printSubtask();
+        System.out.println("/*--");
     }
 }
