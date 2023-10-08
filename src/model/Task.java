@@ -2,12 +2,12 @@ package model;
 
 public class Task {
     protected Integer id = 0;
-    protected String status;
+    protected Status status;
     protected String name;
     protected String description;
 
     public Task(String name, String description) {//NEW ,IN_PROGRESS , DONE статус задачи
-        status = "NEW";
+        status = Status.NEW;
         this.name = name;
         this.description = description;
     }
@@ -20,11 +20,11 @@ public class Task {
         this.id = id;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
@@ -43,6 +43,7 @@ public class Task {
     public void setDescription(String description) {
         this.description = description;
     }
+
     @Override
     public String toString() {
         return "Task{" +
