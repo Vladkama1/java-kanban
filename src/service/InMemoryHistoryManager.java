@@ -3,17 +3,22 @@ package service;
 import model.Task;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
+
 
 public class InMemoryHistoryManager implements HistoryManager {
     private final int MAX_CONSTANT = 10;
-    private final List<Task> history = new ArrayList<>();
+    private final LinkedList<Task> history = new LinkedList<>();
 
     @Override
     public void addTask(Task task) {
-        history.add(task);
-        if (history.size() > MAX_CONSTANT) {
-            history.remove(0);
+        if (task != null) {
+            history.addLast(task);
+            if (history.size() > MAX_CONSTANT) {
+                history.removeFirst();
+            }
+        } else {
+            System.out.println("История пустая!");
         }
     }
 
