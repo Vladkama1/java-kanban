@@ -1,6 +1,7 @@
 import model.Epic;
 import model.Subtask;
 import model.Task;
+import service.HistoryManager;
 import service.Managers;
 import service.TaskManager;
 
@@ -57,8 +58,9 @@ public class Main {
 
         System.out.println("Теперь размер истории - " + taskManager.getHistory().size());
         System.out.println("Начинается с Id - " + taskManager.getHistory().get(0).getId());
+        taskManager.getTask(task1.getId());
         for (Task task : taskManager.getHistory()) {
             System.out.println(task);
         }
-    }
+     }
 }
