@@ -6,7 +6,7 @@ public class Task {
     protected String name;
     protected String description;
 
-    public Task(String name, String description) {//NEW ,IN_PROGRESS , DONE статус задачи
+    public Task(String name, String description) {
         status = Status.NEW;
         this.name = name;
         this.description = description;

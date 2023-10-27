@@ -22,45 +22,43 @@ public class Main {
         Subtask subtask1 = new Subtask("Sub111", "description111", epic1.getId());
         taskManager.saveSubtask(subtask1);
 
-        Epic epic2 = new Epic("Epic22", "description22");
-        taskManager.saveEpic(epic2);
-
-        Subtask subtask2 = new Subtask("Sub222", "", epic2.getId());
+        Subtask subtask2 = new Subtask("Sub222", "", epic1.getId());
         taskManager.saveSubtask(subtask2);
 
-        Subtask subtask3 = new Subtask("Sub333", "", epic2.getId());
+        Subtask subtask3 = new Subtask("Sub333", "", epic1.getId());
         taskManager.saveSubtask(subtask3);
 
-        Epic epic3 = new Epic("Epic33", "");
-        taskManager.saveEpic(epic3);
+        Epic epic2 = new Epic("Epic22", "description22");
+        taskManager.saveEpic(epic2);
 
         taskManager.getTask(task1.getId());
         taskManager.getTask(task2.getId());
 
         taskManager.getEpic(epic1.getId());
-        taskManager.getEpic(epic2.getId());
-        taskManager.getEpic(epic3.getId());
-
         taskManager.getSubtask(subtask1.getId());
         taskManager.getSubtask(subtask2.getId());
         taskManager.getSubtask(subtask3.getId());
 
+        taskManager.getEpic(epic2.getId());
+
+
+        print(taskManager);
+        taskManager.getTask(task1.getId());
+        taskManager.getEpic(epic1.getId());
+
+        print(taskManager);
+
+        taskManager.removeTask(task2.getId());
+        print(taskManager);
+
+        taskManager.removeEpic(epic1.getId());
+        print(taskManager);
+    }
+    public static void print(TaskManager taskManager){
         System.out.println("Сейчас размер истории - " + taskManager.getHistory().size());
         System.out.println("Начинается с Id - " + taskManager.getHistory().get(0).getId());
         for (Task task : taskManager.getHistory()) {
             System.out.println(task);
         }
-        taskManager.getEpic(epic2.getId());
-        taskManager.getEpic(epic3.getId());
-
-        taskManager.getSubtask(subtask1.getId());
-        taskManager.getSubtask(subtask2.getId());
-
-        System.out.println("Теперь размер истории - " + taskManager.getHistory().size());
-        System.out.println("Начинается с Id - " + taskManager.getHistory().get(0).getId());
-        taskManager.getTask(task1.getId());
-        for (Task task : taskManager.getHistory()) {
-            System.out.println(task);
-        }
-     }
+    }
 }

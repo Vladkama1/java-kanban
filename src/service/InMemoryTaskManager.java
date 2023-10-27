@@ -56,7 +56,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask getSubtask(int globalId) {
-        if (tasks.containsKey(globalId)) {
+        if (subtasks.containsKey(globalId)) {
             historyManager.addTask(subtasks.get(globalId));
         }
         return subtasks.get(globalId);
@@ -143,17 +143,26 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTasks() {
+        for (Integer taskId : tasks.keySet()) {
+            historyManager.remove(taskId);
+        }
         tasks.clear();
     }
 
     @Override
     public void deleteEpics() {
+        for (Integer epicId : epics.keySet()) {
+            historyManager.remove(epicId);
+        }
         epics.clear();
-        subtasks.clear();
+        deleteSubtasks();
     }
 
     @Override
     public void deleteSubtasks() {
+        for (Integer subtaskId : subtasks.keySet()) {
+            historyManager.remove(subtaskId);
+        }
         subtasks.clear();
         if (!epics.isEmpty()) {
             for (Epic values : epics.values()) {
@@ -165,15 +174,18 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTask(int globalId) {
+        historyManager.remove(globalId);
         tasks.remove(globalId);
     }
 
     @Override
     public void removeEpic(int globalId) {
         if (epics.containsKey(globalId)) {
+            historyManager.remove(globalId);
             Epic epic = epics.remove(globalId);
             ArrayList<Integer> Integer = epic.getSubtasksId();
             for (Integer id : Integer) {
+                historyManager.remove(id);
                 subtasks.remove(id);
             }
         }
@@ -185,6 +197,7 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = epics.get(subtasks.get(globalId).getEpicId());
             epic.getSubtasksId().remove(globalId);
             updateEpic(epic);
+            historyManager.remove(globalId);
             subtasks.remove(globalId);
         }
     }

@@ -10,6 +10,21 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node first;
     private Node last;
 
+    @Override
+    public List<Task> getHistory() {
+        return new ArrayList<>(getTasks());
+    }
+
+    @Override
+    public void addTask(Task task) {
+            linkLast(task);
+    }
+
+    @Override
+    public void remove(int id) {
+        removeNode(history.remove(id));
+    }
+
     private ArrayList<Task> getTasks() {
         Node start = first;
         ArrayList<Task> histor = new ArrayList<>();
@@ -29,38 +44,26 @@ public class InMemoryHistoryManager implements HistoryManager {
         } else {
             finish.next = newNoda;
             if (history.containsKey(task.getId())) {
-                        remove(task.getId());
+                remove(task.getId());
             }
         }
-    }
-
-    @Override
-    public List<Task> getHistory() {
-        return new ArrayList<>(getTasks());
-    }
-
-    @Override
-    public void addTask(Task task) {
-        if (task != null) {
-            linkLast(task);
-        }
+        history.put(task.getId(), newNoda);
     }
 
     private void removeNode(Node node) {
-        if (node.prev == null) {
-            first = node.next;
-            node.next.prev = null;
-        } else if (node.next == null) {
-            last = node.prev;
-            node.prev.next = null;
-        } else {
-            node.prev.next = node.next;
-            node.next.prev = node.prev;
+        if (node != null) {
+            if (node.next == null && node.prev == null) {
+                first = null;
+            } else if (node.equals(first)) {
+                first = node.next;
+                node.next.prev = null;
+            } else if (node.equals(last)) {
+                last = node.prev;
+                node.prev.next = null;
+            } else {
+                node.prev.next = node.next;
+                node.next.prev = node.prev;
+            }
         }
-    }
-
-    @Override
-    public void remove(int id) {
-        removeNode(history.remove(id));
     }
 }
