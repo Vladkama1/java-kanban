@@ -1,5 +1,7 @@
 package model;
 
+import service.Type;
+
 public class Subtask extends Task {//подзадача
     private Integer epicId;
 
@@ -15,16 +17,11 @@ public class Subtask extends Task {//подзадача
     public void setEpicId(Integer epicId) {
         this.epicId = epicId;
     }
+
     @Override
     public String toString() {
-        return "Subtask{" +
-                "id=" + id +
-                ", status='" + status + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", epicId=" + epicId +
-                '}';
+        return "\n" + id + "," + Type.SUBTASK + "," + name + "," +
+                status + "," + description + "," + epicId;
     }
-
 }
 

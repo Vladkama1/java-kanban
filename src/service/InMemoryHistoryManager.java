@@ -17,7 +17,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void addTask(Task task) {
+        if (task != null) {
             linkLast(task);
+        }
     }
 
     @Override

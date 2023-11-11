@@ -1,5 +1,7 @@
 package model;
 
+import service.Type;
+
 import java.util.ArrayList;
 
 public class Epic extends Task {//большая задача, которя разбивается на подзадачи
@@ -20,13 +22,8 @@ public class Epic extends Task {//большая задача, которя ра
 
     @Override
     public String toString() {
-        return "Epic{" +
-                "id=" + id +
-                ", status='" + status + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", subtasksId=" + subtasksId +
-                '}';
+        return "\n" + id + "," + Type.EPIC + "," + name + "," +
+                status + "," + description + ",";
     }
 }
 

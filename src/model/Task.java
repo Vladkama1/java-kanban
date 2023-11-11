@@ -1,5 +1,7 @@
 package model;
 
+import service.Type;
+
 public class Task {
     protected Integer id = 0;
     protected Status status;
@@ -46,11 +48,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", status='" + status + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                '}';
+        return "\n" + id + "," + Type.TASK + "," + name + "," +
+                status + "," + description + ",";
     }
 }
