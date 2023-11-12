@@ -7,6 +7,7 @@ import model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class HistoryStaticManager {
     public static Task fromString(String value) {
@@ -35,14 +36,11 @@ public class HistoryStaticManager {
     }
 
     public static String historyToString(HistoryManager manager) {
-        StringBuilder stringBuilder = new StringBuilder();
+        StringJoiner stringJoiner = new StringJoiner(",");
         for (Task task : manager.getHistory()) {
-            stringBuilder.append(task.getId()).append(",");
+            stringJoiner.add(String.valueOf(task.getId()));
         }
-        if (stringBuilder.length() != 0) {
-            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        }
-        return stringBuilder.toString();
+        return stringJoiner.toString();
     }
 
     public static List<Integer> historyFromString(String value) {

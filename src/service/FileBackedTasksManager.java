@@ -6,7 +6,6 @@ import model.Status;
 import model.Subtask;
 import model.Task;
 
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -16,92 +15,6 @@ import java.util.List;
 public class FileBackedTasksManager extends InMemoryTaskManager {
     private static final String FIRST_LINE = "id,type,name,status,description,epic";
     private File file;
-
-    public FileBackedTasksManager(File file) {
-        this.file = file;
-    }
-
-    private void addTask(Integer Id) {
-        if (tasks.containsKey(Id)) {
-            historyManager.addTask(tasks.get(Id));
-        }
-        if (epics.containsKey(Id)) {
-            historyManager.addTask(epics.get(Id));
-        }
-        if (subtasks.containsKey(Id)) {
-            historyManager.addTask(subtasks.get(Id));
-        }
-    }
-
-    protected void save() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            if (!Files.exists(Paths.get(file.getParent(), file.getName()))) {
-                Files.createFile(Paths.get(file.getParent(), file.getName()));
-            }
-            writer.write(FIRST_LINE);
-            for (Task value : tasks.values()) {
-                writer.append(value.toString());
-            }
-            for (Epic value : epics.values()) {
-                writer.append(value.toString());
-            }
-            for (Subtask value : subtasks.values()) {
-                writer.append(value.toString());
-            }
-            if (!HistoryStaticManager.historyToString(historyManager).isEmpty()) {
-                writer.append("\n\n" + HistoryStaticManager.historyToString(historyManager));
-            }
-        } catch (IOException exception) {
-            throw new ManagerSaveException("Ошибка, файл не считан: " + file.getName(), exception);
-        }
-    }
-
-    private void putTask(String line) {
-        String[] word = line.split(",");
-        int id = Integer.parseInt(word[0]);
-        if (id > globalId) {
-            globalId = id;
-        }
-        Type type = Type.valueOf(word[1]);
-        if (type == Type.TASK) {
-            Task task = HistoryStaticManager.fromString(line);
-            tasks.put(task.getId(), task);
-        } else if (type == Type.EPIC) {
-            Epic epic = (Epic) HistoryStaticManager.fromString(line);
-            epics.put(epic.getId(), epic);
-        } else {
-            Subtask subtask = (Subtask) HistoryStaticManager.fromString(line);
-            subtasks.put(subtask.getId(), subtask);
-            Epic epic = epics.get(subtask.getEpicId());
-            ArrayList<Integer> subtasksId = epic.getSubtasksId();
-            subtasksId.add(subtask.getId());
-            updateEpicStatus(epic.getId());
-        }
-    }
-
-    public static FileBackedTasksManager loadFromFile(File file) {
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
-        try {
-            String historyFile = Files.readString(file.toPath());
-            String[] historyLine = historyFile.split("\n");
-            for (int i = 1; i < historyLine.length; i++) {
-                if (historyLine[i].isEmpty()) {
-                    if (!historyLine[++i].isEmpty()) {
-                        List<Integer> listId = HistoryStaticManager.historyFromString(historyLine[i]);
-                        for (Integer integer : listId) {
-                            fileBackedTasksManager.addTask(integer);
-                        }
-                    }
-                    break;
-                } else {
-                    fileBackedTasksManager.putTask(historyLine[i]);
-                }
-            }
-        } catch (IOException exception) {
-            throw new ManagerSaveException("Ошибка, файл не считан: " + file.getName(), exception);
-        }
-        return fileBackedTasksManager;
-    }
 
     public static void main(String[] args) {
         File file1 = new File("./src/resources/history.csv");
@@ -139,43 +52,59 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         taskManager2.removeEpic(epic1.getId());
     }
 
+    public static FileBackedTasksManager loadFromFile(File file) {
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+            String historyLine;
+            while ((historyLine = bufferedReader.readLine()) != null) {
+                if (historyLine.isEmpty()) {
+                    historyLine = bufferedReader.readLine();
+                    if (!historyLine.isEmpty()) {
+                        List<Integer> listId = HistoryStaticManager.historyFromString(historyLine);
+                        for (Integer integer : listId) {
+                            fileBackedTasksManager.addTask(integer);
+                        }
+                    }
+                    break;
+                } else if (!historyLine.equals(FIRST_LINE)) {
+                    fileBackedTasksManager.putTask(historyLine);
+                }
+            }
+        } catch (IOException exception) {
+            throw new ManagerSaveException("Ошибка, файл не считан: " + file.getName(), exception);
+        }
+        return fileBackedTasksManager;
+    }
+
+    public FileBackedTasksManager(File file) {
+        this.file = file;
+    }
+
     @Override
     public Task getTask(int globalId) {
-        if (tasks.containsKey(globalId)) {
-            historyManager.addTask(tasks.get(globalId));
-            save();
-        }
-        return tasks.get(globalId);
+        Task task = super.getTask(globalId);
+        save();
+        return task;
     }
 
     @Override
     public Epic getEpic(int globalId) {
-        if (epics.containsKey(globalId)) {
-            historyManager.addTask(epics.get(globalId));
-            save();
-        }
-        return epics.get(globalId);
+        Epic epic = super.getEpic(globalId);
+        save();
+        return epic;
     }
 
     @Override
     public Subtask getSubtask(int globalId) {
-        if (subtasks.containsKey(globalId)) {
-            historyManager.addTask(subtasks.get(globalId));
-            save();
-        }
-        return subtasks.get(globalId);
+        Subtask subtask = super.getSubtask(globalId);
+        save();
+        return subtask;
     }
 
     @Override
     public ArrayList<Subtask> getAllSubtaskByEpic(int globalId) {
-        ArrayList<Subtask> allSubtasksId = new ArrayList<>();
-        if (epics.containsKey(globalId)) {
-            ArrayList<Integer> subtasksId = epics.get(globalId).getSubtasksId();
-            for (Integer id : subtasksId) {
-                allSubtasksId.add(subtasks.get(id));
-                save();
-            }
-        }
+        ArrayList<Subtask> allSubtasksId = super.getAllSubtaskByEpic(globalId);
+        save();
         return allSubtasksId;
     }
 
@@ -249,5 +178,67 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public void removeSubtask(Integer globalId) {
         super.removeSubtask(globalId);
         save();
+    }
+
+    protected void save() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            if (!Files.exists(Paths.get(file.getParent(), file.getName()))) {
+                Files.createFile(Paths.get(file.getParent(), file.getName()));
+            }
+            writer.write(FIRST_LINE);
+            for (Task value : tasks.values()) {
+                writer.append(value.toString());
+            }
+            for (Epic value : epics.values()) {
+                writer.append(value.toString());
+            }
+            for (Subtask value : subtasks.values()) {
+                writer.append(value.toString());
+            }
+            if (!HistoryStaticManager.historyToString(historyManager).isEmpty()) {
+                writer.append("\n\n" + HistoryStaticManager.historyToString(historyManager));
+            }
+        } catch (IOException exception) {
+            throw new ManagerSaveException("Ошибка, файл не считан: " + file.getName(), exception);
+        }
+    }
+
+    private void addTask(Integer Id) {
+        if (tasks.containsKey(Id)) {
+            historyManager.addTask(tasks.get(Id));
+        }
+        if (epics.containsKey(Id)) {
+            historyManager.addTask(epics.get(Id));
+        }
+        if (subtasks.containsKey(Id)) {
+            historyManager.addTask(subtasks.get(Id));
+        }
+    }
+
+    private void putTask(String line) {
+        String[] word = line.split(",");
+        int id = Integer.parseInt(word[0]);
+        if (id > globalId) {
+            globalId = id;
+        }
+        Type type = Type.valueOf(word[1]);
+        switch (type) {
+            case TASK:
+                Task task = HistoryStaticManager.fromString(line);
+                tasks.put(task.getId(), task);
+                break;
+            case EPIC:
+                Epic epic = (Epic) HistoryStaticManager.fromString(line);
+                epics.put(epic.getId(), epic);
+                break;
+            default:
+                Subtask subtask = (Subtask) HistoryStaticManager.fromString(line);
+                subtasks.put(subtask.getId(), subtask);
+                Epic epic1 = epics.get(subtask.getEpicId());
+                ArrayList<Integer> subtasksId = epic1.getSubtasksId();
+                subtasksId.add(subtask.getId());
+                updateEpicStatus(epic1.getId());
+                break;
+        }
     }
 }
