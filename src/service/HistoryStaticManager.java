@@ -5,6 +5,7 @@ import model.Status;
 import model.Subtask;
 import model.Task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
@@ -17,13 +18,16 @@ public class HistoryStaticManager {
         String name = values[2];
         Status status = Status.valueOf(values[3]);
         String description = values[4];
+
+
         if (type.equals(Type.TASK)) {
-            Task task = new Task(name, description);
+
+            Task task = new Task(name, description,Integer.parseInt(values[6]), parseLocal(values[5]));
             task.setId(id);
             task.setStatus(status);
             return task;
         } else if (type.equals(Type.SUBTASK)) {
-            Subtask subtask = new Subtask(name, description, Integer.parseInt(values[5]));
+            Subtask subtask = new Subtask(name, description, Integer.parseInt(values[6]), parseLocal(values[5]),Integer.parseInt(values[7]));
             subtask.setId(id);
             subtask.setStatus(status);
             return subtask;
@@ -34,6 +38,13 @@ public class HistoryStaticManager {
             return epic;
         }
     }
+    public static LocalDateTime parseLocal(String value){
+        if (value.equals("null")){
+            return null;
+        }
+        return LocalDateTime.parse(value);
+    }
+
 
     public static String historyToString(HistoryManager manager) {
         StringJoiner stringJoiner = new StringJoiner(",");

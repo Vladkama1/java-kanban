@@ -12,7 +12,7 @@ public interface TaskManager {
 
     Task getTask(int globalId);
 
-    Epic getEpic(int globalId);
+    Epic getEpic(Integer globalId);
 
     Subtask getSubtask(int globalId);
 

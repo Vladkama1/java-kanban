@@ -1,9 +1,4 @@
-id,type,name,status,description,epic
-1,TASK,task1,NEW,task1 from taskManager1,
-2,TASK,task2,NEW,task2 from taskManager1,
-8,TASK,task1,NEW,task3 from taskManager2,
-9,TASK,task2,NEW,task4 from taskManager2,
-6,EPIC,Epic22,IN_PROGRESS,epic2 from taskManager1,
-7,SUBTASK,Sub333,IN_PROGRESS,subtask3 from taskManager1,6
-
-1,2,6,7,8,9
+id,type,name,status,description,startTime,duration,epic
+1,TASK,task1,NEW,description1,2000-12-12T12:01,12,
+2,EPIC,Epic11,NEW,description11,
+3,SUBTASK,Sub111,NEW,description111,2000-12-12T12:16,12,2

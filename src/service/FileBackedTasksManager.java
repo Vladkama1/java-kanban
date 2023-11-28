@@ -13,44 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-    private static final String FIRST_LINE = "id,type,name,status,description,epic";
+    private static final String FIRST_LINE = "id,type,name,status,description,startTime,duration,epic";
     private File file;
 
-    public static void main(String[] args) {
-        File file1 = new File("./src/resources/history.csv");
-        TaskManager taskManager = FileBackedTasksManager.loadFromFile(file1);
-        Task task1 = new Task("task1", "task1 from taskManager1");
-        taskManager.saveTask(task1);
-        Task task2 = new Task("task2", "task2 from taskManager1");
-        taskManager.saveTask(task2);
-        Epic epic1 = new Epic("Epic11", "epic1 from taskManager1");
-        taskManager.saveEpic(epic1);
-        Subtask subtask1 = new Subtask("Sub111", "subtask1 from taskManager1", epic1.getId());
-        taskManager.saveSubtask(subtask1);
-        Subtask subtask2 = new Subtask("Sub222", "subtask2 from taskManager1", epic1.getId());
-        taskManager.saveSubtask(subtask2);
-        Epic epic2 = new Epic("Epic22", "epic2 from taskManager1");
-        taskManager.saveEpic(epic2);
-        Subtask subtask3 = new Subtask("Sub333", "subtask3 from taskManager1", epic2.getId());
-        taskManager.saveSubtask(subtask3);
-        subtask3.setStatus(Status.IN_PROGRESS);
-        taskManager.updateSubtask(subtask3);
-        taskManager.getTask(task1.getId());
-        taskManager.getTask(task2.getId());
-        taskManager.getEpic(epic1.getId());
-        taskManager.getSubtask(subtask1.getId());
-        taskManager.getSubtask(subtask2.getId());
-        taskManager.getEpic(epic2.getId());
-        taskManager.getSubtask(subtask3.getId());
-        TaskManager taskManager2 = FileBackedTasksManager.loadFromFile(file1);
-        Task task3 = new Task("task1", "task3 from taskManager2");
-        taskManager2.saveTask(task3);
-        Task task4 = new Task("task2", "task4 from taskManager2");
-        taskManager2.saveTask(task4);
-        taskManager2.getTask(task3.getId());
-        taskManager2.getTask(task4.getId());
-        taskManager2.removeEpic(epic1.getId());
-    }
 
     public static FileBackedTasksManager loadFromFile(File file) {
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
@@ -88,7 +53,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Epic getEpic(int globalId) {
+    public Epic getEpic(Integer globalId) {
         Epic epic = super.getEpic(globalId);
         save();
         return epic;
@@ -217,15 +182,18 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void putTask(String line) {
         String[] word = line.split(",");
-        int id = Integer.parseInt(word[0]);
-        if (id > globalId) {
-            globalId = id;
+        Integer id1 = Integer.parseInt(word[0]);
+        if (id1 > globalId) {
+            globalId = id1;
         }
         Type type = Type.valueOf(word[1]);
         switch (type) {
             case TASK:
                 Task task = HistoryStaticManager.fromString(line);
-                tasks.put(task.getId(), task);
+                if (checkDateTimeTask(task)) {
+                    tasks.put(task.getId(), task);
+                    prioritet.add(task);
+                }
                 break;
             case EPIC:
                 Epic epic = (Epic) HistoryStaticManager.fromString(line);
@@ -233,11 +201,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 break;
             default:
                 Subtask subtask = (Subtask) HistoryStaticManager.fromString(line);
-                subtasks.put(subtask.getId(), subtask);
-                Epic epic1 = epics.get(subtask.getEpicId());
-                ArrayList<Integer> subtasksId = epic1.getSubtasksId();
-                subtasksId.add(subtask.getId());
-                updateEpicStatus(epic1.getId());
+                if (checkDateTimeTask(subtask)) {
+                    subtasks.put(subtask.getId(), subtask);
+                    prioritet.add(subtask);
+                    Epic epic1 = epics.get(subtask.getEpicId());
+                    ArrayList<Integer> subtasksId = epic1.getSubtasksId();
+                    subtasksId.add(subtask.getId());
+                    updateEpicStatus(epic1.getId());
+                }
                 break;
         }
     }
