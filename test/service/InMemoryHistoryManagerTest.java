@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryHistoryManagerTest {
@@ -43,6 +44,8 @@ class InMemoryHistoryManagerTest {
         historyManager.addTask(subtask1);
         List<Task> listTask = historyManager.getHistory();
         assertEquals(3, listTask.size());
+        List<Task> prioritets = List.of(task1,epic1,subtask1);
+        assertEquals(prioritets, historyManager.getHistory());
     }
 
     @Test

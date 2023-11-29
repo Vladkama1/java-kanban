@@ -7,15 +7,33 @@ import model.Task;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 abstract class TaskManagerTest<T extends TaskManager> {
+
     protected T taskManager;
     protected Task task1;
     protected Epic epic1;
     protected Subtask subtask1;
+
+    @Test
+    void checPrioritet() {
+        Task task2 = new Task("task2", "description1", 12,
+                LocalDateTime.of(2004, 12, 12, 12, 1));
+        Task task3 = new Task("task2", "description1", 12,
+                LocalDateTime.of(2005, 12, 12, 12, 1));
+        taskManager.saveTask(task2);
+        taskManager.saveTask(task3);
+        List<Task> priorit = taskManager.getPrioritet();
+        List<Task> prioritets = new ArrayList<>();
+        prioritets.add(task1);
+        prioritets.add(subtask1);
+        prioritets.add(task2);
+        prioritets.add(task3);
+        assertEquals(priorit, prioritets);
+    }
 
     @Test
     void getEpic() {
@@ -145,6 +163,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(name, taskUpdate.getName(), "Имя не совпадает!");
         assertEquals(Status.IN_PROGRESS, taskUpdate.getStatus(), "Статус не совпадает!");
     }
+
     @Test
     void updateTaskEmptyMap() {
         final int taskId = task1.getId();
@@ -194,6 +213,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(name1, epicUpdate.getName(), "Имя не совпадает!");
         assertEquals(Status.IN_PROGRESS, epicUpdate.getStatus(), "Статус не совпадает!");
     }
+
     @Test
     void updateSubtaskEmptyMap() {
         final int subtaskId = subtask1.getId();
@@ -259,9 +279,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void removeTask() {
         Task task = taskManager.getTask(task1.getId());
-       assertNotNull(task);
-       taskManager.removeTask(task.getId());
-       assertNotNull(task,"Метод удаления задочи не работает");
+        assertNotNull(task);
+        taskManager.removeTask(task.getId());
+        assertNotNull(task, "Метод удаления задочи не работает");
     }
 
     @Test
@@ -269,7 +289,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = taskManager.getEpic(epic1.getId());
         assertNotNull(epic);
         taskManager.removeEpic(epic.getId());
-        assertNotNull(epic,"Метод удаления задочи не работает");
+        assertNotNull(epic, "Метод удаления задочи не работает");
     }
 
     @Test
@@ -277,6 +297,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask = taskManager.getSubtask(subtask1.getId());
         assertNotNull(subtask);
         taskManager.removeSubtask(subtask.getId());
-        assertNotNull(subtask,"Метод удаления задочи не работает");
+        assertNotNull(subtask, "Метод удаления задочи не работает");
     }
 }

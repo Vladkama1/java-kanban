@@ -17,7 +17,7 @@ public class Main {
         Epic epic1 = new Epic("Epic11", "description11");
         taskManager.saveEpic(epic1);
         Subtask subtask1 = new Subtask("Sub111", "description111", 12,
-                LocalDateTime.of(2000,12,12,12,16), epic1.getId());
+                LocalDateTime.of(2000, 12, 12, 12, 16), epic1.getId());
         taskManager.saveSubtask(subtask1);
     }
 

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public interface TaskManager {
+    List<Task> getPrioritet();
 
     Task getTask(int globalId);
 
