@@ -29,9 +29,31 @@ public class HttpTaskServer {
         gson = Managers.getGson();
         this.taskManager = taskManager;
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
-        server.createContext("/tasks/", this::hadler);
+        server.createContext("/tasks/", this::handler);
     }
-    private void hadler(HttpExchange httpExchange) {
+    public void start() {
+        System.out.println("Запускаем сервер на порту " + PORT);
+        System.out.println("Открой в браузере http://localhost:" + PORT + "/");
+        server.start();
+    }
+
+    public void stop() {
+        server.stop(0);
+        System.out.println("Остановили сервер на порту " + PORT);
+    }
+
+    protected String readText(HttpExchange h) throws IOException {
+        return new String(h.getRequestBody().readAllBytes(), UTF_8);
+    }
+
+    protected void sendText(HttpExchange h, String text) throws IOException {
+        byte[] resp = text.getBytes(UTF_8);
+        h.getResponseHeaders().add("Content-Type", "application/json");
+        h.sendResponseHeaders(200, resp.length);
+        h.getResponseBody().write(resp);
+    }
+
+    private void handler(HttpExchange httpExchange) {
         try {
             String path = httpExchange.getRequestURI().getPath();
             String requestMetod = httpExchange.getRequestMethod();
@@ -198,27 +220,5 @@ public class HttpTaskServer {
         } catch (NumberFormatException exception) {
             return -1;
         }
-    }
-
-    public void start() {
-        System.out.println("Запускаем сервер на порту " + PORT);
-        System.out.println("Открой в браузере http://localhost:" + PORT + "/");
-        server.start();
-    }
-
-    public void stop() {
-        server.stop(0);
-        System.out.println("Остановили сервер на порту " + PORT);
-    }
-
-    protected String readText(HttpExchange h) throws IOException {
-        return new String(h.getRequestBody().readAllBytes(), UTF_8);
-    }
-
-    protected void sendText(HttpExchange h, String text) throws IOException {
-        byte[] resp = text.getBytes(UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json");
-        h.sendResponseHeaders(200, resp.length);
-        h.getResponseBody().write(resp);
     }
 }

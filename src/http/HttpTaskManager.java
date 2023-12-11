@@ -9,10 +9,11 @@ import service.FileBackedTasksManager;
 import service.Managers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class HttpTaskManager extends FileBackedTasksManager {
     private final KVTaskClient kvTaskClient;
-    Gson gson = Managers.getGson();
+    private Gson gson = Managers.getGson();
 
     public HttpTaskManager(String url) {
         this(url, false);
@@ -26,6 +27,21 @@ public class HttpTaskManager extends FileBackedTasksManager {
         }
     }
 
+    public void load() {
+        List<Task> taskArrayList = gson.fromJson(kvTaskClient.load("/tasks"), new TypeToken<List<Task>>() {
+        }.getType());
+        List<Epic> epicArrayList = gson.fromJson(kvTaskClient.load("/epics"), new TypeToken<List<Epic>>() {
+        }.getType());
+        List<Subtask> subtaskArrayList = gson.fromJson(kvTaskClient.load("/subtasks"), new TypeToken<List<Subtask>>() {
+        }.getType());
+        List<Task> historyArrayList = gson.fromJson(kvTaskClient.load("/history"), new TypeToken<List<Task>>() {
+        }.getType());
+        putTasks(taskArrayList);
+        putEpics(epicArrayList);
+        putSubtasks(subtaskArrayList);
+        putHistory(historyArrayList);
+    }
+
     @Override
     protected void save() {
         kvTaskClient.put("/tasks", gson.toJson(getAllTasks()));
@@ -34,55 +50,37 @@ public class HttpTaskManager extends FileBackedTasksManager {
         kvTaskClient.put("/history", gson.toJson(getHistory()));
     }
 
-    public void load() {
-        ArrayList<Task> taskArrayList = gson.fromJson(kvTaskClient.load("/tasks"), new TypeToken<ArrayList<Task>>() {
-        }.getType());
-        ArrayList<Epic> epicArrayList = gson.fromJson(kvTaskClient.load("/epics"), new TypeToken<ArrayList<Epic>>() {
-        }.getType());
-        ArrayList<Subtask> subtaskArrayList = gson.fromJson(kvTaskClient.load("/subtasks"), new TypeToken<ArrayList<Subtask>>() {
-        }.getType());
-        ArrayList<Task> historyArrayList = gson.fromJson(kvTaskClient.load("/history"), new TypeToken<ArrayList<Task>>() {
-        }.getType());
-        putTasks(taskArrayList);
-        putEpics(epicArrayList);
-        putSubtasks(subtaskArrayList);
-        putHistory(historyArrayList);
-    }
-
-    private void putHistory(ArrayList<Task> historyArrayList) {
+    private void putHistory(List<Task> historyArrayList) {
         for (Task task : historyArrayList) {
-            globalId = Math.max(globalId, task.getId());
-            if (tasks.containsKey(globalId)) {
-                historyArrayList.add(task);
-            } else if (subtasks.containsKey(globalId)) {
-                historyArrayList.add(task);
-            } else if (epics.containsKey(globalId)) {
-                historyArrayList.add(task);
-            } else {
-                System.out.println("ERROR");
+            if (tasks.containsKey(task.getId())) {
+                historyManager.addTask(task);
+            } else if (subtasks.containsKey(task.getId())) {
+                historyManager.addTask(subtasks.get(task.getId()));
+            } else if (epics.containsKey(task.getId())) {
+                historyManager.addTask(epics.get(task.getId()));
             }
         }
     }
 
-    private void putSubtasks(ArrayList<Subtask> subtaskArrayList) {
+    private void putSubtasks(List<Subtask> subtaskArrayList) {
         for (Subtask subtask : subtaskArrayList) {
             globalId = Math.max(globalId, subtask.getId());
-            subtasks.put(globalId, subtask);
+            subtasks.put(subtask.getId(), subtask);
             prioritet.add(subtask);
         }
     }
 
-    private void putEpics(ArrayList<Epic> epicArrayList) {
+    private void putEpics(List<Epic> epicArrayList) {
         for (Epic epic : epicArrayList) {
             globalId = Math.max(globalId, epic.getId());
-            epics.put(globalId, epic);
+            epics.put(epic.getId(), epic);
         }
     }
 
-    private void putTasks(ArrayList<Task> taskArrayList) {
+    private void putTasks(List<Task> taskArrayList) {
         for (Task task : taskArrayList) {
             globalId = Math.max(globalId, task.getId());
-            tasks.put(globalId, task);
+            tasks.put(task.getId(), task);
             prioritet.add(task);
         }
     }
